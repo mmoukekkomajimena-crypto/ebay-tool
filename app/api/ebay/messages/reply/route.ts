@@ -1,21 +1,9 @@
-import { cookies } from 'next/headers'
+import { getEbayToken } from '@/lib/ebay-token'
 import { replyToMessage } from '@/lib/ebay-messages'
-import { refreshToken } from '@/lib/ebay'
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies()
-    let token = cookieStore.get('ebay_access_token')?.value
-    const refresh = cookieStore.get('ebay_refresh_token')?.value
-
-    if (!token && refresh) {
-      const newTokens = await refreshToken(refresh)
-      token = newTokens.access_token
-    }
-
-    if (!token) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 })
-    }
+    const token = await getEbayToken()
 
     const { recipientUserId, itemId, body, parentMessageId, subject } =
       await request.json()

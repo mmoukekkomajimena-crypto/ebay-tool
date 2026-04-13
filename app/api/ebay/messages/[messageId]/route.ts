@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers'
+import { getEbayToken } from '@/lib/ebay-token'
 import { getMessageDetail } from '@/lib/ebay-messages'
-import { refreshToken } from '@/lib/ebay'
 import type { NextRequest } from 'next/server'
 
 export async function GET(
@@ -9,21 +8,9 @@ export async function GET(
 ) {
   try {
     const { messageId } = await ctx.params
-
-    const cookieStore = await cookies()
-    let token = cookieStore.get('ebay_access_token')?.value
-    const refresh = cookieStore.get('ebay_refresh_token')?.value
-
-    if (!token && refresh) {
-      const newTokens = await refreshToken(refresh)
-      token = newTokens.access_token
-    }
-
-    if (!token) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 })
-    }
-
+    const token = await getEbayToken()
     const message = await getMessageDetail(token, messageId)
+
     if (!message) {
       return Response.json({ error: 'Message not found' }, { status: 404 })
     }
