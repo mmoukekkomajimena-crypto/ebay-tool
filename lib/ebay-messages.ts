@@ -7,6 +7,8 @@ const SITE_ID = '0' // US
 const parser = new XMLParser({
   ignoreAttributes: false,
   removeNSPrefix: true,
+  processEntities: false,
+  htmlEntities: true,
 })
 
 function tradingHeaders(callName: string, token: string) {
