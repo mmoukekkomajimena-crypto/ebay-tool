@@ -30,13 +30,21 @@ export async function getAccessToken(code: string) {
 
 export async function refreshToken(refresh: string) {
   const creds = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')
+  const scopes = [
+    'https://api.ebay.com/oauth/api_scope',
+    'https://api.ebay.com/oauth/api_scope/sell.inventory',
+    'https://api.ebay.com/oauth/api_scope/sell.account',
+    'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
+    'https://api.ebay.com/oauth/api_scope/sell.reputation',
+    'https://api.ebay.com/oauth/api_scope/sell.reputation.readonly',
+  ].join(' ')
   const res = await fetch(`${BASE}/identity/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${creds}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: `grant_type=refresh_token&refresh_token=${refresh}`,
+    body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refresh)}&scope=${encodeURIComponent(scopes)}`,
   })
   return res.json()
 }
