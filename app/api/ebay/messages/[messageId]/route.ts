@@ -1,5 +1,5 @@
 import { getEbayToken } from '@/lib/ebay-token'
-import { getMessageDetail } from '@/lib/ebay-messages'
+import { getMessageDetail, stripHtml } from '@/lib/ebay-messages'
 import type { NextRequest } from 'next/server'
 
 export async function GET(
@@ -15,7 +15,10 @@ export async function GET(
       return Response.json({ error: 'Message not found' }, { status: 404 })
     }
 
-    return Response.json({ message })
+    // Strip HTML from message text on server side
+    return Response.json({
+      message: { ...message, text: stripHtml(message.text) },
+    })
   } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 })
   }

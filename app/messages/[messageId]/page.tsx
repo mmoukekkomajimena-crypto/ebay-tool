@@ -55,11 +55,10 @@ export default function MessageDetailPage() {
     if (!message?.text) return
     setTranslating(true)
     try {
-      const plainText = stripHtml(message.text)
       const res = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: plainText, targetLang: 'JA' }),
+        body: JSON.stringify({ text: message.text, targetLang: 'JA' }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -180,7 +179,7 @@ export default function MessageDetailPage() {
         {/* Original Message Bubble */}
         <div className="space-y-2">
           <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{stripHtml(message.text)}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
           </div>
 
           {/* Translate Button */}
@@ -306,25 +305,6 @@ export default function MessageDetailPage() {
       </div>
     </div>
   )
-}
-
-/** Strip HTML tags and decode entities to get plain text */
-function stripHtml(html: string): string {
-  if (typeof document !== 'undefined') {
-    const doc = new DOMParser().parseFromString(html, 'text/html')
-    return doc.body.textContent || ''
-  }
-  // Fallback: basic regex strip
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 function formatDateTime(dateStr: string): string {
