@@ -1,6 +1,11 @@
 import { refreshToken } from '@/lib/ebay'
+import { stripHtml } from '@/lib/ebay-messages'
 
 export async function GET() {
+  // Test stripHtml
+  const testInput = '<style>body{color:red}</style><p>Hello <b>World</b></p>'
+  const testOutput = stripHtml(testInput)
+
   const hasClientId = !!process.env.EBAY_CLIENT_ID
   const hasClientSecret = !!process.env.EBAY_CLIENT_SECRET
   const hasRefreshToken = !!process.env.EBAY_REFRESH_TOKEN
@@ -28,6 +33,7 @@ export async function GET() {
   }
 
   return Response.json({
+    stripHtmlTest: { input: testInput, output: testOutput },
     env: {
       hasClientId,
       hasClientSecret,
