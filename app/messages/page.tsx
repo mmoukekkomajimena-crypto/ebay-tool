@@ -138,8 +138,10 @@ export default function MessagesPage() {
 }
 
 function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
   try {
     const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
@@ -152,6 +154,6 @@ function formatDate(dateStr: string): string {
       return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
     }
   } catch {
-    return dateStr
+    return ''
   }
 }

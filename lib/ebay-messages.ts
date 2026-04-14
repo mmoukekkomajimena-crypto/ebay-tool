@@ -198,16 +198,24 @@ export async function replyToMessage(
 /** Strip HTML tags and decode common entities to plain text */
 export function stripHtml(html: string): string {
   // Step 1: Decode HTML entities FIRST (eBay returns entity-encoded HTML)
-  let text = html
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&apos;/gi, "'")
-    .replace(/&#x27;/gi, "'")
-    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
-    .replace(/&amp;/gi, '&') // &amp; last so it doesn't double-decode
+  // Run entity decoding twice to handle double-encoded entities
+  function decodeEntities(s: string): string {
+    return s
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/&apos;/gi, "'")
+      .replace(/&#x27;/gi, "'")
+      .replace(/&copy;/gi, '©')
+      .replace(/&reg;/gi, '®')
+      .replace(/&trade;/gi, '™')
+      .replace(/&#x([0-9a-fA-F]+);/g, (_m, hex) => String.fromCharCode(parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
+      .replace(/&amp;/gi, '&') // &amp; last so it doesn't double-decode
+  }
+  let text = decodeEntities(decodeEntities(html))
 
   // Step 2: Remove style/script blocks entirely
   text = text

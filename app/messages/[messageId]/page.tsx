@@ -308,9 +308,12 @@ export default function MessageDetailPage() {
 }
 
 function formatDateTime(dateStr: string): string {
+  if (!dateStr) return ''
   try {
     const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return dateStr || ''
     return date.toLocaleString('ja-JP', {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
