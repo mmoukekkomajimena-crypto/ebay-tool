@@ -197,31 +197,45 @@ export async function replyToMessage(
 
 /** Strip HTML tags and decode common entities to plain text */
 export function stripHtml(html: string): string {
-  return html
-    // Remove style/script blocks entirely
+  // Step 1: Decode HTML entities FIRST (eBay returns entity-encoded HTML)
+  let text = html
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
+    .replace(/&amp;/gi, '&') // &amp; last so it doesn't double-decode
+
+  // Step 2: Remove style/script blocks entirely
+  text = text
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
-    // Replace <br>, <p>, <div> etc. with newlines
+
+  // Step 3: Replace block elements with newlines
+  text = text
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n')
     .replace(/<\/div>/gi, '\n')
     .replace(/<\/tr>/gi, '\n')
     .replace(/<\/li>/gi, '\n')
-    // Remove all remaining tags
+    .replace(/<\/h[1-6]>/gi, '\n')
+
+  // Step 4: Remove all remaining tags (including comments)
+  text = text
+    .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<[^>]*>/g, '')
-    // Decode HTML entities
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#x27;/gi, "'")
-    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
-    // Clean up whitespace
+
+  // Step 5: Clean up whitespace
+  text = text
     .replace(/[ \t]+/g, ' ')
-    .replace(/\n\s*\n/g, '\n\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
+
+  return text
 }
 
 function escapeXml(str: string): string {
